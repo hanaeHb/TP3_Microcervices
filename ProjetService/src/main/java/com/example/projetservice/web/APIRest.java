@@ -32,7 +32,8 @@ import java.util.List;
 @RequestMapping("/v1/projets")
 public class APIRest {
 
-    private ProjetServiceImpl  projetService;
+    private ProjetServiceImpl projetService;
+
     public APIRest(ProjetServiceImpl projetService) {
         this.projetService = projetService;
     }
@@ -43,23 +44,23 @@ public class APIRest {
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = RequestProjetDto.class )
+                            schema = @Schema(implementation = RequestProjetDto.class)
                     )
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "bien enregiter",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ResponseProjetDto.class )
+                                    schema = @Schema(implementation = ResponseProjetDto.class)
                             )
                     ),
 
-                    @ApiResponse(responseCode = "4xx",description = "erreur client"),
-                    @ApiResponse(responseCode = "5xx",description = "erreur serveur"),
+                    @ApiResponse(responseCode = "4xx", description = "erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "erreur serveur"),
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseProjetDto> add(@RequestBody RequestProjetDto requestProjetDto) {
         ResponseProjetDto responseProjetDto = projetService.Add_Projet(requestProjetDto);
@@ -74,17 +75,17 @@ public class APIRest {
                     @ApiResponse(responseCode = "200", description = "bien enregiter",
                             content = @Content(
                                     mediaType = "application/json",
-                                    array = @ArraySchema(schema = @Schema(implementation = ResponseProjetDto.class ))
+                                    array = @ArraySchema(schema = @Schema(implementation = ResponseProjetDto.class))
                             )
                     ),
-                    @ApiResponse(responseCode = "4xx",description = "erreur client"),
-                    @ApiResponse(responseCode = "5xx",description = "erreur serveur"),
+                    @ApiResponse(responseCode = "4xx", description = "erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "erreur serveur"),
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping
-    public ResponseEntity<List<ResponseProjetDto>> getall(){
+    public ResponseEntity<List<ResponseProjetDto>> getall() {
         List<ResponseProjetDto> projetDtos = projetService.GETALLProjet();
         return ResponseEntity.ok(projetDtos);
 
@@ -97,15 +98,15 @@ public class APIRest {
                     @ApiResponse(responseCode = "200", description = "bien récuperer",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ResponseProjetDto.class )
+                                    schema = @Schema(implementation = ResponseProjetDto.class)
                             )
                     ),
-                    @ApiResponse(responseCode = "4xx",description = "erreur client"),
-                    @ApiResponse(responseCode = "5xx",description = "erreur serveur"),
+                    @ApiResponse(responseCode = "4xx", description = "erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "erreur serveur"),
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ResponseProjetDto> getProjetById(@PathVariable Integer id) {
         ResponseProjetDto responseProjetDto = projetService.GETProjetById(id);
@@ -119,26 +120,26 @@ public class APIRest {
                     required = true,
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = RequestProjetDto.class )
+                            schema = @Schema(implementation = RequestProjetDto.class)
                     )
             ),
             responses = {
                     @ApiResponse(responseCode = "200", description = "bien modifier",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = ResponseProjetDto.class )
+                                    schema = @Schema(implementation = ResponseProjetDto.class)
                             )
                     ),
 
-                    @ApiResponse(responseCode = "4xx",description = "erreur client"),
-                    @ApiResponse(responseCode = "5xx",description = "erreur serveur"),
+                    @ApiResponse(responseCode = "4xx", description = "erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "erreur serveur"),
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ResponseProjetDto> update(@PathVariable Integer id,
-                                                       @RequestBody RequestProjetDto requestProjetDto) {
+                                                    @RequestBody RequestProjetDto requestProjetDto) {
         ResponseProjetDto responseProjetDto = projetService.UPDATEProjet(id, requestProjetDto);
         return ResponseEntity.ok(responseProjetDto);
     }
@@ -148,16 +149,35 @@ public class APIRest {
             parameters = @Parameter(name = "id", required = true),
             responses = {
                     @ApiResponse(responseCode = "200", description = "bien supprimer"),
-                    @ApiResponse(responseCode = "4xx",description = "erreur client"),
-                    @ApiResponse(responseCode = "5xx",description = "erreur serveur"),
+                    @ApiResponse(responseCode = "4xx", description = "erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "erreur serveur"),
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable Integer id) {
-       projetService.DELETEProjetBYID(id);
+        projetService.DELETEProjetBYID(id);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = " Nombre de projets par enseignant",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Succès",
+                            content = @Content(
+                                    mediaType = "application/json"
+                            )
+                    ),
+                    @ApiResponse(responseCode = "4xx", description = "Erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "Erreur serveur"),
+            },
+            parameters = @Parameter(name = "idEnseignant", required = true)
+    )
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_USER')")
+    @GetMapping("/enseignant/{idEnseignant}")
+    public ResponseEntity<List<ResponseProjetDto>> getByEnseignant(@PathVariable Integer idEnseignant) {
+        List<ResponseProjetDto> chercheurs = projetService.getProjetsByEnseignant(idEnseignant);
+        return ResponseEntity.ok(chercheurs);
+    }
 }

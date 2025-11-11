@@ -3,29 +3,39 @@ package com.example.projetservice.service;
 import com.example.projetservice.dto.RequestProjetDto;
 import com.example.projetservice.dto.ResponseProjetDto;
 import com.example.projetservice.entity.projet;
+import com.example.projetservice.feign.ChercheurRestClient;
+import com.example.projetservice.feign.EnseignantRestClient;
 import com.example.projetservice.mapper.ProjetMapper;
 import com.example.projetservice.repository.ProjetRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ProjetServiceImpl implements ProjetService {
-    public ProjetServiceImpl(ProjetRepository projetRepository, ProjetMapper projetMapper) {
+    public ProjetServiceImpl(ProjetRepository projetRepository, ProjetMapper projetMapper, EnseignantRestClient enseignantRestClient, ChercheurRestClient chercheurRestClient) {
         this.projetRepository = projetRepository;
         this.projetMapper = projetMapper;
+        this.enseignantRestClient = enseignantRestClient;
+        this.chercheurRestClient = chercheurRestClient;
     }
 
+    private final ChercheurRestClient chercheurRestClient;
+    private EnseignantRestClient  enseignantRestClient;
     private ProjetRepository projetRepository;
     private ProjetMapper  projetMapper;
 
     @Override
     public ResponseProjetDto Add_Projet(RequestProjetDto requestProjetDto) {
+        enseignantRestClient.getEnseignantById(requestProjetDto.getIdEnseignant());
+        chercheurRestClient.getChercheurById(requestProjetDto.getIdChercheur());
         projet projet = projetMapper.DTO_TO_ENTITY(requestProjetDto);
         projet savedProjet = projetRepository.save(projet);
         return projetMapper.ENTITY_TO_DTO(savedProjet);
     }
+
 
     @Override
     public List<ResponseProjetDto> GETALLProjet() {
@@ -58,5 +68,10 @@ public class ProjetServiceImpl implements ProjetService {
     @Override
     public void DELETEProjetBYID(Integer id) {
         projetRepository.deleteById(id);
+    }
+
+    @Override
+    public List<ResponseProjetDto> getProjetsByEnseignant(Integer enseignantId) {
+        return projetRepository.findByIdEnseignant(enseignantId).stream().map(projetMapper::ENTITY_TO_DTO).collect(Collectors.toList());
     }
 }

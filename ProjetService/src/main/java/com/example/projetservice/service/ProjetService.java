@@ -11,4 +11,5 @@ public interface ProjetService {
     public ResponseProjetDto GETProjetById(Integer id);
     public ResponseProjetDto UPDATEProjet(Integer id , RequestProjetDto requestProjetDto);
     public void DELETEProjetBYID(Integer id);
+    List<ResponseProjetDto> getProjetsByEnseignant(Integer idEnseignant);
 }

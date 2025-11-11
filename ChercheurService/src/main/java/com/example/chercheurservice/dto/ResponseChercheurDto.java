@@ -16,4 +16,7 @@ public class ResponseChercheurDto {
     private String prenom;
     private String email;
     private String password;
+    private Integer idEnseignant;
+    private Integer idProjet;
+
 }

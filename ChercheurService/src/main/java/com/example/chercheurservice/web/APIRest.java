@@ -59,7 +59,7 @@ public class APIRest {
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @PostMapping
     public ResponseEntity<ResponseChercheurDto> add(@RequestBody RequestChercheurDto requestChercheurDto) {
         ResponseChercheurDto responseChercheurDto = chercheurService.Add_Chercheur(requestChercheurDto);
@@ -82,7 +82,7 @@ public class APIRest {
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping
     public ResponseEntity<List<ResponseChercheurDto>> getall(){
         List<ResponseChercheurDto> chercheurDtos = chercheurService.GETALLChercheur();
@@ -105,7 +105,7 @@ public class APIRest {
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @GetMapping("/{id}")
     public ResponseEntity<ResponseChercheurDto> getChercheurById(@PathVariable Integer id) {
         ResponseChercheurDto responseChercheurDto = chercheurService.GETChercheurById(id);
@@ -135,7 +135,7 @@ public class APIRest {
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ResponseChercheurDto> update(@PathVariable Integer id,
                                                         @RequestBody RequestChercheurDto requestChercheurDto) {
@@ -153,10 +153,39 @@ public class APIRest {
             }
     )
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity delete(@PathVariable Integer id) {
         chercheurService.DELETEChercheurBYID(id);
         return ResponseEntity.ok().build();
     }
+
+
+    @Operation(
+            summary = " Nombre de chercheurs par enseignant",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Succès",
+                            content = @Content(
+                                    mediaType = "application/json"
+                            )
+                    ),
+                    @ApiResponse(responseCode = "4xx", description = "Erreur client"),
+                    @ApiResponse(responseCode = "5xx", description = "Erreur serveur"),
+            },
+            parameters = @Parameter(name = "idEnseignant", required = true)
+    )
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_USER')")
+    @GetMapping("/enseignant/{idEnseignant}")
+    public ResponseEntity<List<ResponseChercheurDto>> getByEnseignant(@PathVariable Integer idEnseignant) {
+        List<ResponseChercheurDto> chercheurs = chercheurService.getChercheursByEnseignant(idEnseignant);
+        return ResponseEntity.ok(chercheurs);
+    }
+
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_USER')")
+    @GetMapping("/projet/{idProjet}")
+    public ResponseEntity<List<ResponseChercheurDto>> getByProjet(@PathVariable Integer idProjet) {
+        List<ResponseChercheurDto> chercheurs = chercheurService.getChercheursByProjet(idProjet);
+        return ResponseEntity.ok(chercheurs);
+    }
+
 }
